@@ -37,7 +37,8 @@
   /* ---------- Nav ---------- */
   .nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(11,12,14,0.92); backdrop-filter: blur(6px); z-index: 20; }
   .nav-left { display: flex; align-items: center; gap: 40px; }
-  .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 700; font-style: italic; color: var(--red); }
+  .logo { display:flex; align-items:center; }
+  .logo img { width:86px; height:auto; display:block; }
   .nav-links { display: none; gap: 26px; }
   .nav-links a { font-size: 14px; font-weight: 600; color: var(--text2); padding-bottom: 4px; }
   .nav-links a.active { color: var(--text); border-bottom: 2px solid var(--red); }
@@ -170,7 +171,7 @@
 
 <header class="nav">
   <div class="nav-left">
-    <div class="logo">ESPN</div>
+    <div class="logo"><img src="./ESPN.jpeg" alt="ESPN"></div>
     <nav class="nav-links">
       <a href="#" class="active">Home</a>
       <a href="#">Watch</a>
