@@ -1,0 +1,638 @@
+<!--
+  Team: Tanya Hemdev, Szu-Lun Huang, Vaibhavi Nataraj Kulkarni, Kai Liuson
+
+  Code-Generation Software: Claude (Anthropic)
+  We chose Claude because it performs strongly in both coding and front-end/UI
+  design. It was able to translate our product brief directly into a working,
+  interactive prototype -- from JSON data schemas to a fully responsive
+  HTML/CSS/JS interface -- with clean code structure and polished visual
+  design, making it the most efficient tool for our ESPN streaming app project.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESPN Stream — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #CC0000;
+    --live: #FF0033;
+    --bg: #0B0C0E;
+    --card: #15171C;
+    --border: #282C34;
+    --text: #FFFFFF;
+    --text2: #9EA3AD;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+  body { min-height: 100vh; padding-bottom: 84px; }
+  .headline { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: 0.02em; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; }
+  img, svg { display: block; }
+
+  /* ---------- Nav ---------- */
+  .nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(11,12,14,0.92); backdrop-filter: blur(6px); z-index: 20; }
+  .nav-left { display: flex; align-items: center; gap: 40px; }
+  .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 700; font-style: italic; color: var(--red); }
+  .nav-links { display: none; gap: 26px; }
+  .nav-links a { font-size: 14px; font-weight: 600; color: var(--text2); padding-bottom: 4px; }
+  .nav-links a.active { color: var(--text); border-bottom: 2px solid var(--red); }
+  .nav-right { display: flex; align-items: center; gap: 18px; }
+  .icon-btn { background: transparent; border: none; color: var(--text); display: flex; align-items: center; justify-content: center; padding: 0; }
+  .avatar { position: relative; width: 32px; height: 32px; border-radius: 50%; background: var(--border); border: none; }
+  .avatar .badge { position: absolute; top: -3px; right: -3px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg); }
+
+  /* ---------- Layout ---------- */
+  main { padding: 20px 20px 8px 20px; max-width: 1400px; margin: 0 auto; }
+  .section { margin-bottom: 34px; }
+  .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+  .section-sub { font-size: 11px; color: var(--text2); margin-bottom: 12px; }
+
+  /* ---------- Following ---------- */
+  .following-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+  .chip-follow { flex-shrink: 0; display: flex; align-items: center; gap: 7px; background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 7px 13px; font-size: 12px; font-weight: 600; }
+  .team-logo { width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+  .team-logo.sm { width: 20px; height: 20px; }
+  .matchup-logos { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:10px; pointer-events:none; }
+  .matchup-logos img { width:42px; height:42px; object-fit:contain; filter:drop-shadow(0 4px 8px rgba(0,0,0,.55)); }
+  .matchup-vs { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:12px; opacity:.8; }
+  .media-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; }
+  .media-shade { position:absolute; inset:0; z-index:1; background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.58)); }
+  .thumb .thumb-stripes, .thumb .play-dot, .thumb .badge-live, .thumb .badge-final, .thumb .badge-net, .thumb .badge-sport, .thumb .progress-track, .thumb .matchup-logos { z-index:2; }
+  .thumb.has-photo .thumb-stripes { opacity:.35; }
+  .thumb.has-photo .play-dot span { background:rgba(0,0,0,.48); backdrop-filter:blur(4px); }
+  .thumb.has-photo:hover .media-img { transform:scale(1.04); }
+  .media-img { transition:transform .28s ease; }
+  .matchup-logos { z-index:3 !important; }
+  .show-label { position:absolute; left:12px; bottom:10px; right:12px; z-index:3; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:17px; text-shadow:0 2px 8px #000; }
+  .hero-teams { display:flex; align-items:center; gap:14px; margin-bottom:10px; }
+  .hero-teams img { width:58px; height:58px; object-fit:contain; filter:drop-shadow(0 5px 10px rgba(0,0,0,.45)); }
+  .hero-vs { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:700; opacity:.8; }
+  .team-line { display:flex; align-items:center; gap:7px; }
+  .team-logo-fallback { display:flex; align-items:center; justify-content:center; border-radius:50%; background:rgba(255,255,255,.12); font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; }
+
+  /* ---------- Hero ---------- */
+  .hero { position: relative; border-radius: 16px; overflow: hidden; min-height: 210px; background: linear-gradient(155deg, #7A1F0E 0%, var(--red) 55%, #2B0A05 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 24px; margin-bottom: 34px; }
+  .hero-stripes { position: absolute; inset: 0; background-image: repeating-linear-gradient(115deg, rgba(255,255,255,0.07) 0px, rgba(255,255,255,0.07) 2px, transparent 2px, transparent 14px); pointer-events: none; }
+  .hero-mark { position: absolute; top: -30px; right: -40px; opacity: 0.14; }
+  .hero-content { position: relative; z-index: 1; max-width: 520px; }
+  .hero-title { font-size: 26px; font-weight: 700; }
+  .hero-meta { font-size: 13px; color: #F0D8D2; margin: 4px 0 16px 0; }
+  .hero-cta { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--bg); font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 8px; border: none; }
+  .hero-audio { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,0.45); border: none; color: #fff; display: flex; align-items: center; justify-content: center; z-index: 1; }
+
+  @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .badge-live { background: var(--live); animation: livePulse 1.6s ease-in-out infinite; position: absolute; top: 16px; left: 16px; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px; display: flex; align-items: center; gap: 5px; z-index: 1; }
+  .badge-live .dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; display: inline-block; }
+  .badge-final { position: absolute; top: 16px; left: 16px; background: #3A3B42; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px; z-index: 1; }
+
+  /* ---------- Rows / carousels ---------- */
+  .row-wrap { position: relative; }
+  .row-scroll { display: flex; gap: 14px; overflow-x: auto; scroll-behavior: smooth; padding-bottom: 4px; scrollbar-width: none; }
+  .row-scroll::-webkit-scrollbar { display: none; }
+  .row-arrow { display: none; position: absolute; top: 42%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: rgba(11,12,14,0.85); border: 1px solid var(--border); color: #fff; align-items: center; justify-content: center; z-index: 5; }
+  .row-arrow.left { left: -14px; }
+  .row-arrow.right { right: -14px; }
+
+  /* ---------- Cards ---------- */
+  .card { flex-shrink: 0; }
+  .thumb { position: relative; border-radius: 10px; overflow: hidden; transition: transform 0.18s ease, box-shadow 0.18s ease; }
+  .thumb-stripes { position: absolute; inset: 0; background-image: repeating-linear-gradient(115deg, rgba(255,255,255,0.07) 0px, rgba(255,255,255,0.07) 2px, transparent 2px, transparent 14px); pointer-events: none; }
+  .play-dot { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .play-dot span { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.22); display: flex; align-items: center; justify-content: center; }
+  .badge-net { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.55); color: #fff; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; z-index: 1; }
+  .badge-sport { position: absolute; bottom: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1; }
+  .card-title { font-size: 12px; font-weight: 500; margin-top: 6px; }
+  .card-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .card-score { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; margin-right: 6px; }
+  .progress-track { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(0,0,0,0.35); }
+  .progress-fill { height: 100%; background: #fff; }
+
+  @media (hover: hover) {
+    .thumb:hover { transform: scale(1.045); box-shadow: 0 12px 28px rgba(0,0,0,0.5); z-index: 3; }
+    .row-wrap:hover .row-arrow { display: flex; }
+  }
+
+  .rank-num { font-family: 'Barlow Condensed', sans-serif; font-size: 44px; font-weight: 700; color: #3A3B42; line-height: 0.85; }
+  .rank-row { display: flex; align-items: flex-end; flex-shrink: 0; }
+  .rank-row .thumb { margin-left: -10px; z-index: 1; }
+
+  /* ---------- Chips / filters ---------- */
+  .chip { flex-shrink: 0; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 20px; }
+  .chip.active { background: var(--red); border-color: var(--red); color: #fff; }
+
+  .shows-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+  /* ---------- Bottom nav (mobile) ---------- */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 74px; background: #111116; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around; padding-bottom: 12px; z-index: 20; }
+  .bottom-nav button { background: transparent; border: none; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text2); font-size: 10px; font-weight: 600; }
+  .bottom-nav button.active { color: var(--red); }
+
+  /* ---------- Next Watch overlay ---------- */
+  .next-watch { position: fixed; inset: 0; background: var(--bg); z-index: 50; overflow-y: auto; display: none; }
+  .next-watch.open { display: block; }
+  .nw-player { position: relative; min-height: 260px; background: linear-gradient(160deg, #C75B12 0%, #1A1A1A 100%); display: flex; flex-direction: column; justify-content: space-between; padding: 24px; }
+  .nw-top { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; }
+  .nw-back { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.4); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+  .nw-ended { background: rgba(0,0,0,0.45); color: var(--text2); font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 4px; }
+  .nw-replay { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .nw-replay-circle { width: 56px; height: 56px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.6); display: flex; align-items: center; justify-content: center; }
+  .nw-title-wrap { position: relative; z-index: 1; }
+  .nw-body { padding: 20px 20px 40px 20px; max-width: 1200px; margin: 0 auto; }
+  .up-next-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 30px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; max-width: 760px; }
+  .up-next-thumb { width: 130px; height: 84px; border-radius: 8px; position: relative; overflow: hidden; flex-shrink: 0; }
+  .countdown-label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); font-weight: 600; }
+  .spinner { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--red); border-top-color: transparent; animation: spin 0.9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .nw-actions { display: flex; gap: 10px; margin-top: 12px; }
+  .btn-ghost { flex: 1; background: transparent; border: 1px solid var(--border); color: var(--text2); font-size: 13px; font-weight: 600; padding: 10px 16px; border-radius: 8px; }
+  .btn-solid { flex: 1; background: var(--red); border: none; color: #fff; font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 8px; }
+
+  @media (min-width: 860px) {
+    .nav-links { display: flex; }
+    body { padding-bottom: 40px; }
+    .bottom-nav { display: none; }
+    main { padding: 32px 40px; }
+    .hero { min-height: 320px; padding: 36px; }
+    .hero-title { font-size: 40px; }
+    .hero-meta { font-size: 14px; }
+    .card { width: 240px; }
+    .shows-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .up-next-thumb { width: 200px; height: 130px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-left">
+    <div class="logo">ESPN</div>
+    <nav class="nav-links">
+      <a href="#" class="active">Home</a>
+      <a href="#">Watch</a>
+      <a href="#">Scores</a>
+      <a href="#">Fantasy</a>
+      <a href="#">News</a>
+    </nav>
+  </div>
+  <div class="nav-right">
+    <button class="icon-btn" aria-label="Search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+    <button class="avatar" aria-label="Profile, watch history">
+      <span class="badge" id="historyBadge">0</span>
+    </button>
+  </div>
+</header>
+
+<main id="home-view">
+
+  <div class="section">
+    <div class="section-title" style="font-size:11px; letter-spacing:0.06em; color:var(--text2); text-transform:uppercase;">Following</div>
+    <div class="following-row" id="followingRow"></div>
+  </div>
+
+  <div class="hero">
+    <img class="media-img" src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1600&q=85" alt="Stadium under the lights">
+    <div class="media-shade" style="background:linear-gradient(90deg,rgba(11,12,14,.88) 0%,rgba(11,12,14,.58) 48%,rgba(11,12,14,.18) 100%);"></div>
+    <div class="hero-stripes" style="z-index:1"></div>
+    <svg class="hero-mark" width="180" height="180" viewBox="0 0 180 180" fill="none" stroke="#fff" stroke-width="2"><circle cx="90" cy="90" r="70"/><circle cx="90" cy="90" r="44"/><line x1="90" y1="6" x2="90" y2="174"/><line x1="6" y1="90" x2="174" y2="90"/></svg>
+    <div class="badge-live"><span class="dot"></span>LIVE</div>
+    <button class="hero-audio" id="audioToggle" aria-label="Unmute">
+      <svg id="audioIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+    </button>
+    <div class="hero-content">
+      <div class="hero-teams"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png" alt="New York Giants logo"><span class="hero-vs">AT</span><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lar.png" alt="Los Angeles Rams logo"></div>
+      <div class="headline hero-title">Giants @ Rams</div>
+      <div class="hero-meta">Monday Night Football &middot; Q2 12:37 &middot; SoFi Stadium &middot; ABC/ESPN</div>
+      <button class="hero-cta" id="watchLiveBtn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="#0B0C0E"><polygon points="6,4 20,12 6,20"/></svg>
+        Watch Live
+      </button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Continue Watching</div>
+    <div class="row-wrap">
+      <button class="row-arrow left" data-scroll="continueRow" data-dir="-1" aria-label="Scroll left">&#8249;</button>
+      <div class="row-scroll" id="continueRow"></div>
+      <button class="row-arrow right" data-scroll="continueRow" data-dir="1" aria-label="Scroll right">&#8250;</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title" id="liveNowTitle">Scores & Live</div>
+    <div class="section-sub">Real results, Sept 19&ndash;21, 2026 (snapshot &mdash; scores do not auto-update)</div>
+    <div class="row-wrap">
+      <button class="row-arrow left" data-scroll="liveRow" data-dir="-1" aria-label="Scroll left">&#8249;</button>
+      <div class="row-scroll" id="liveRow"></div>
+      <button class="row-arrow right" data-scroll="liveRow" data-dir="1" aria-label="Scroll right">&#8250;</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Trending Now</div>
+    <div class="row-wrap">
+      <button class="row-arrow left" data-scroll="trendingRow" data-dir="-1" aria-label="Scroll left">&#8249;</button>
+      <div class="row-scroll" id="trendingRow"></div>
+      <button class="row-arrow right" data-scroll="trendingRow" data-dir="1" aria-label="Scroll right">&#8250;</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Because You Watched</div>
+    <div class="section-sub">NBA Playoffs: Celtics vs. Heat &mdash; Game 7</div>
+    <div class="row-wrap">
+      <button class="row-arrow left" data-scroll="recRow" data-dir="-1" aria-label="Scroll left">&#8249;</button>
+      <div class="row-scroll" id="recRow"></div>
+      <button class="row-arrow right" data-scroll="recRow" data-dir="1" aria-label="Scroll right">&#8250;</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Browse by Sport</div>
+    <div class="row-scroll" id="sportChips" style="margin-bottom: 4px;"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title" id="showsTitle">All Shows</div>
+    <div class="shows-grid" id="showsGrid"></div>
+  </div>
+
+</main>
+
+<nav class="bottom-nav">
+  <button class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</button>
+  <button><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><polygon points="10,9 15,12 10,15" fill="currentColor" stroke="none"/></svg>Watch</button>
+  <button><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Scores</button>
+  <button><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Profile</button>
+</nav>
+
+<div class="next-watch" id="nextWatch">
+  <div class="nw-player">
+    <div class="hero-stripes"></div>
+    <div class="nw-top">
+      <button class="nw-back" id="nwBack">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Home
+      </button>
+      <div class="nw-ended">ENDED</div>
+    </div>
+    <div class="nw-replay">
+      <div class="nw-replay-circle">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M6 4l4 0 0 16-4 0z"/><path d="M14 4l4 0 0 16-4 0z"/></svg>
+      </div>
+      <div style="font-size:12px;">Replay</div>
+    </div>
+    <div class="nw-title-wrap">
+      <div class="headline" style="font-size:22px; font-weight:700;">NBA Playoffs: Celtics vs. Heat &mdash; Game 7</div>
+      <div style="width:100%; height:3px; background:rgba(255,255,255,0.25); border-radius:3px; margin-top:10px; overflow:hidden;">
+        <div style="height:100%; width:100%; background:#fff;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="nw-body">
+    <div class="up-next-card">
+      <div class="up-next-thumb" id="upNextThumb"></div>
+      <div style="flex:1; min-width:200px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+          <div style="font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--text2);">Up Next</div>
+          <div class="countdown-label" id="countdownLabel"></div>
+        </div>
+        <div class="headline" id="upNextTitle" style="font-size:18px; font-weight:700;"></div>
+        <div style="font-size:12px; color:var(--text2); margin-top:4px;" id="upNextTag"></div>
+        <div class="nw-actions">
+          <button class="btn-ghost" id="cancelAutoplay">Cancel</button>
+          <button class="btn-solid" id="playNow">Play Now</button>
+        </div>
+      </div>
+    </div>
+    <div class="section-title">Because You Watched</div>
+    <div class="section-sub">NBA Playoffs: Celtics vs. Heat &mdash; Game 7</div>
+    <div class="row-wrap">
+      <button class="row-arrow left" data-scroll="nwRecRow" data-dir="-1" aria-label="Scroll left">&#8249;</button>
+      <div class="row-scroll" id="nwRecRow"></div>
+      <button class="row-arrow right" data-scroll="nwRecRow" data-dir="1" aria-label="Scroll right">&#8250;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- Data (mirrors espn_stream_data.json) ---------------- */
+
+const GRADIENTS = {
+  NFL: 'linear-gradient(135deg, #6B3A1F 0%, #CC0000 100%)',
+  NBA: 'linear-gradient(135deg, #C75B12 0%, #1A1A1A 100%)',
+  MLB: 'linear-gradient(135deg, #1B3A6B 0%, #CC0000 100%)',
+  Soccer: 'linear-gradient(135deg, #14532D 0%, #052E14 100%)',
+  Tennis: 'linear-gradient(135deg, #A8C93A 0%, #4D5C14 100%)',
+  Golf: 'linear-gradient(135deg, #2F6B3A 0%, #123018 100%)',
+  NHL: 'linear-gradient(135deg, #142B4D 0%, #06101F 100%)',
+  CFB: 'linear-gradient(135deg, #7A0C2E 0%, #2B0413 100%)',
+  default: 'linear-gradient(135deg, #2B2C32 0%, #17181C 100%)'
+};
+
+const SPORT_ICONS = {
+  NFL: '<path d="M4 12c0-3.5 3.5-7 8-7s8 3.5 8 7-3.5 7-8 7-8-3.5-8-7z"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="10" y1="10" x2="10" y2="14"/><line x1="12" y1="9.5" x2="12" y2="14.5"/><line x1="14" y1="10" x2="14" y2="14"/>',
+  CFB: '<path d="M4 12c0-3.5 3.5-7 8-7s8 3.5 8 7-3.5 7-8 7-8-3.5-8-7z"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="10" y1="10" x2="10" y2="14"/><line x1="12" y1="9.5" x2="12" y2="14.5"/><line x1="14" y1="10" x2="14" y2="14"/>',
+  NBA: '<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4v16M6.3 6.3c2.6 2.6 2.6 8.8 0 11.4M17.7 6.3c-2.6 2.6-2.6 8.8 0 11.4"/>',
+  MLB: '<circle cx="12" cy="12" r="8"/><path d="M6 6c2.6 1.8 2.6 9.4 0 12.2M18 6c-2.6 1.8-2.6 9.4 0 12.2"/>',
+  Soccer: '<circle cx="12" cy="12" r="8"/><polygon points="12,7.5 15,9.6 13.9,13 10.1,13 9,9.6" fill="#fff" stroke="none"/>',
+  Tennis: '<circle cx="12" cy="12" r="8"/><path d="M5 6c3.5 2.6 3.5 8.8 0 12M19 6c-3.5 2.6-3.5 8.8 0 12"/>',
+  Golf: '<line x1="7" y1="3" x2="7" y2="21"/><path d="M7 4l9 3.2-9 3.2z" fill="#fff" stroke="none"/><circle cx="7" cy="21" r="1.4" fill="#fff" stroke="none"/>',
+  NHL: '<ellipse cx="12" cy="16" rx="7" ry="2.6"/><line x1="5.5" y1="16" x2="15" y2="5"/>'
+};
+
+function sportIconSvg(category) {
+  const inner = SPORT_ICONS[category] || '';
+  return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.4">' + inner + '</svg>';
+}
+function gradientFor(category) { return GRADIENTS[category] || GRADIENTS.default; }
+
+
+const TEAM_LOGOS = {
+  'Giants @ Rams': ['https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png','https://a.espncdn.com/i/teamlogos/nfl/500/lar.png'],
+  'Bills @ Lions': ['https://a.espncdn.com/i/teamlogos/nfl/500/buf.png','https://a.espncdn.com/i/teamlogos/nfl/500/det.png'],
+  'Yankees @ Diamondbacks': ['https://a.espncdn.com/i/teamlogos/mlb/500/nyy.png','https://a.espncdn.com/i/teamlogos/mlb/500/ari.png'],
+  'Giants @ Dodgers': ['https://a.espncdn.com/i/teamlogos/mlb/500/sf.png','https://a.espncdn.com/i/teamlogos/mlb/500/lad.png'],
+  'Man City vs. Sunderland': ['https://a.espncdn.com/i/teamlogos/soccer/500/382.png','https://a.espncdn.com/i/teamlogos/soccer/500/366.png'],
+  'Sabres @ Penguins': ['https://a.espncdn.com/i/teamlogos/nhl/500/buf.png','https://a.espncdn.com/i/teamlogos/nhl/500/pit.png'],
+  'No. 2 Georgia vs. Arkansas': ['https://a.espncdn.com/i/teamlogos/ncaa/500/61.png','https://a.espncdn.com/i/teamlogos/ncaa/500/8.png'],
+  'No. 8 Ole Miss vs. No. 7 LSU': ['https://a.espncdn.com/i/teamlogos/ncaa/500/145.png','https://a.espncdn.com/i/teamlogos/ncaa/500/99.png']
+};
+function matchupLogoHtml(title) {
+  const logos = TEAM_LOGOS[title];
+  if (!logos) return '';
+  return '<div class="matchup-logos"><img src="'+logos[0]+'" alt=""><span class="matchup-vs">VS</span><img src="'+logos[1]+'" alt=""></div>';
+}
+
+
+const MEDIA_IMAGES = {
+  basketball: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=900&q=82',
+  football: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=900&q=82',
+  studio: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=900&q=82',
+  soccer: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=900&q=82',
+  baseball: 'https://images.unsplash.com/photo-1508344928928-7165b67de128?auto=format&fit=crop&w=900&q=82',
+  golf: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=900&q=82',
+  tennis: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=900&q=82'
+};
+const TEAM_PAIR_LOGOS = {
+  'NBA Playoffs: Celtics vs. Heat — Game 7': ['https://a.espncdn.com/i/teamlogos/nba/500/bos.png','https://a.espncdn.com/i/teamlogos/nba/500/mia.png'],
+  'NBA Finals 2016: Game 7 — Cavaliers vs. Warriors': ['https://a.espncdn.com/i/teamlogos/nba/500/cle.png','https://a.espncdn.com/i/teamlogos/nba/500/gs.png'],
+  'NBA Finals 2010: Game 7 — Lakers vs. Celtics': ['https://a.espncdn.com/i/teamlogos/nba/500/lal.png','https://a.espncdn.com/i/teamlogos/nba/500/bos.png'],
+  'NBA Finals 1998: Game 6 — Bulls vs. Jazz': ['https://a.espncdn.com/i/teamlogos/nba/500/chi.png','https://a.espncdn.com/i/teamlogos/nba/500/utah.png']
+};
+function imageFor(category, title) {
+  if (/First Take/i.test(title||'')) return MEDIA_IMAGES.studio;
+  if (category === 'NBA') return MEDIA_IMAGES.basketball;
+  if (category === 'NFL' || category === 'CFB') return MEDIA_IMAGES.football;
+  if (category === 'Soccer') return MEDIA_IMAGES.soccer;
+  if (category === 'MLB') return MEDIA_IMAGES.baseball;
+  if (category === 'Golf') return MEDIA_IMAGES.golf;
+  if (category === 'Tennis') return MEDIA_IMAGES.tennis;
+  return '';
+}
+
+const CONTINUE_WATCHING = [
+  { title: 'NBA Playoffs: Celtics vs. Heat \u2014 Game 7', category: 'NBA', progress: 59 },
+  { title: 'NFL Live \u2014 Tuesday Recap', category: 'NFL', progress: 62 },
+  { title: 'First Take \u2014 Monday', category: 'NFL', progress: 85 }
+];
+
+const LIVE_NOW = [
+  { title: 'Giants @ Rams', category: 'NFL', network: 'ABC/ESPN', meta: 'NFL \u2022 Q2 12:37', score: '0\u20137', status: 'live' },
+  { title: 'Bills @ Lions', category: 'NFL', network: 'FOX', meta: 'NFL \u2022 Final', score: '41\u201331', status: 'final' },
+  { title: 'Yankees @ Diamondbacks', category: 'MLB', network: 'ESPN', meta: 'MLB \u2022 Final', score: '4\u20138', status: 'final' },
+  { title: 'Giants @ Dodgers', category: 'MLB', network: 'ESPN+', meta: 'MLB \u2022 Final', score: '1\u20133', status: 'final' },
+  { title: 'Man City vs. Sunderland', category: 'Soccer', network: 'Peacock', meta: 'Premier League \u2022 Final', score: '5\u20133', status: 'final' },
+  { title: 'Sabres @ Penguins', category: 'NHL', network: 'ESPN+', meta: 'NHL \u2022 Preseason, 7:00 PM ET', score: '', status: 'upcoming' },
+  { title: 'Biltmore Championship', category: 'Golf', network: 'ESPN+', meta: 'Golf \u2022 Final \u2014 Champion: J. Bridgeman', score: '', status: 'final' },
+  { title: 'Singapore Open (WTA 500)', category: 'Tennis', network: 'Tennis Channel', meta: 'Tennis \u2022 Live \u2014 Day 3 of 9', score: '', status: 'live' },
+  { title: 'No. 2 Georgia vs. Arkansas', category: 'CFB', network: 'ABC', meta: 'College Football \u2022 Final', score: '45\u201317', status: 'final' },
+  { title: 'No. 8 Ole Miss vs. No. 7 LSU', category: 'CFB', network: 'ABC', meta: 'College Football \u2022 Final', score: '32\u201324', status: 'final' }
+];
+
+const TRENDING_NOW = [
+  { rank: 1, title: 'MNF: Giants @ Rams', category: 'NFL' },
+  { rank: 2, title: 'Bills 41, Lions 31 \u2014 Recap', category: 'NFL' },
+  { rank: 3, title: 'Man City 5, Sunderland 3 \u2014 Highlights', category: 'Soccer' },
+  { rank: 4, title: 'Diamondbacks 8, Yankees 4 \u2014 Recap', category: 'MLB' },
+  { rank: 5, title: 'Georgia 45, Arkansas 17 \u2014 Highlights', category: 'CFB' }
+];
+
+const RECOMMENDED_NBA = [
+  { title: 'NBA Finals 2016: Game 7 \u2014 Cavaliers vs. Warriors', tag: 'Classic Replay' },
+  { title: 'ESPN 30 for 30: Bad Boys', tag: 'Documentary' },
+  { title: 'The Last Dance \u2014 Episode 1', tag: 'Documentary' },
+  { title: 'NBA Finals 2010: Game 7 \u2014 Lakers vs. Celtics', tag: 'Classic Replay' },
+  { title: 'Detail: Breaking Down Jayson Tatum\u2019s Game', tag: 'Analysis Series' },
+  { title: 'NBA Finals 1998: Game 6 \u2014 Bulls vs. Jazz', tag: 'Classic Replay' }
+];
+
+const FOLLOWING = ['ESPN', 'ESPN2', 'ESPNU', 'SEC Network'];
+
+const SPORTS = ['All', 'NFL', 'NBA', 'MLB', 'Soccer', 'Tennis', 'Golf'];
+const SHOWS_BY_SPORT = {
+  All: ['First Take', 'NFL Live', 'SportsCenter', 'Pardon the Interruption'],
+  NFL: ['NFL Live', 'NFL PrimeTime', 'Fantasy Focus', 'Draft Central'],
+  NBA: ['NBA Today', 'The Jump', 'Hoop Streams', 'Around the Rim'],
+  MLB: ['Baseball Tonight', 'Diamond Report', 'MLB Insiders', 'Pitch Preview'],
+  Soccer: ['Match Day', 'Pitch Talk', 'Transfer Watch', 'Goal Rush'],
+  Tennis: ['Match Point', 'Baseline', 'Grand Slam Weekly', 'Court Report'],
+  Golf: ['Fairway Report', 'Tee Times', 'Major Watch', 'Leaderboard Live']
+};
+const SHOW_CATEGORY_CYCLE = ['NFL', 'NBA', 'MLB', 'Soccer'];
+
+/* ---------------- Render helpers ---------------- */
+
+function thumbHtml(category, opts) {
+  opts = opts || {};
+  const grad = gradientFor(category);
+  const photo = opts.photo || '';
+  const cls = photo ? 'thumb has-photo' : 'thumb';
+  let html = '<div class="' + cls + '" style="background:' + grad + '; width:' + (opts.w || 150) + 'px; height:' + (opts.h || 84) + 'px;">';
+  if (photo) html += '<img class="media-img" src="' + photo + '" alt="" loading="lazy"><div class="media-shade"></div>';
+  html += '<div class="thumb-stripes"></div>';
+  if (opts.matchupTitle) html += matchupLogoHtml(opts.matchupTitle);
+  if (opts.teamPair && TEAM_PAIR_LOGOS[opts.teamPair]) {
+    const pair = TEAM_PAIR_LOGOS[opts.teamPair];
+    html += '<div class="matchup-logos"><img src="'+pair[0]+'" alt=""><span class="matchup-vs">VS</span><img src="'+pair[1]+'" alt=""></div>';
+  }
+  html += '<div class="play-dot"><span><svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></span></div>';
+  if (opts.badge === 'live') html += '<div class="badge-live" style="top:8px; left:8px; position:absolute;"><span class="dot"></span>LIVE</div>';
+  if (opts.badge === 'final') html += '<div class="badge-final" style="top:8px; left:8px; position:absolute;">FINAL</div>';
+  if (opts.badge === 'upcoming') html += '<div class="badge-final" style="top:8px; left:8px; position:absolute; background:#17181C; border:1px solid #282C34;">UPCOMING</div>';
+  if (opts.network) html += '<div class="badge-net">' + opts.network + '</div>';
+  if (opts.showSportIcon) html += '<div class="badge-sport">' + sportIconSvg(category) + '</div>';
+  if (typeof opts.progress === 'number') html += '<div class="progress-track"><div class="progress-fill" style="width:' + opts.progress + '%;"></div></div>';
+  html += '</div>';
+  return html;
+}
+
+function renderFollowing() {
+  const check = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#CC0000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  document.getElementById('followingRow').innerHTML = FOLLOWING.map(name =>
+    '<div class="chip-follow">' + check + '<span>' + name + '</span></div>'
+  ).join('');
+}
+
+function renderContinueWatching() {
+  document.getElementById('continueRow').innerHTML = CONTINUE_WATCHING.map(item => `
+    <div class="card">
+      ${thumbHtml(item.category, { w: 160, h: 90, progress: item.progress, photo: imageFor(item.category, item.title), teamPair: item.title })}
+      <div class="card-title">${item.title}</div>
+    </div>
+  `).join('');
+}
+
+function renderLiveNow() {
+  document.getElementById('liveNowTitle').textContent = 'Scores & Live \u00b7 ' + LIVE_NOW.length + ' Games';
+  document.getElementById('liveRow').innerHTML = LIVE_NOW.map(item => `
+    <div class="card">
+      ${thumbHtml(item.category, { w: 150, h: 84, badge: item.status, network: item.network, showSportIcon: true, matchupTitle: item.title, photo: imageFor(item.category, item.title) })}
+      <div class="card-title">${item.title}</div>
+      <div class="card-sub">${item.score ? '<span class="card-score">' + item.score + '</span>' : ''}${item.meta}</div>
+    </div>
+  `).join('');
+}
+
+function renderTrending() {
+  document.getElementById('trendingRow').innerHTML = TRENDING_NOW.map(item => `
+    <div class="rank-row">
+      <div class="rank-num">${item.rank}</div>
+      ${thumbHtml(item.category, { w: 128, h: 84, showSportIcon: true, matchupTitle: item.title.replace(/^MNF: /,'').replace(/ \u2014 .*/, ''), photo: imageFor(item.category, item.title) })}
+    </div>
+  `).join('');
+}
+
+function renderRecommended(targetId) {
+  document.getElementById(targetId).innerHTML = RECOMMENDED_NBA.map(item => `
+    <div class="card" style="width:150px;">
+      ${thumbHtml('NBA', { w: 150, h: 84, photo: MEDIA_IMAGES.basketball, teamPair: item.title })}
+      <div class="card-title">${item.title}</div>
+      <div class="card-sub">${item.tag}</div>
+    </div>
+  `).join('');
+}
+
+let currentSport = 'All';
+
+function renderSportChips() {
+  document.getElementById('sportChips').innerHTML = SPORTS.map(name =>
+    `<button class="chip${name === currentSport ? ' active' : ''}" data-sport="${name}">${name}</button>`
+  ).join('');
+  document.querySelectorAll('#sportChips .chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentSport = btn.dataset.sport;
+      renderSportChips();
+      renderShows();
+    });
+  });
+}
+
+function renderShows() {
+  document.getElementById('showsTitle').textContent = currentSport + ' Shows';
+  const list = SHOWS_BY_SPORT[currentSport];
+  document.getElementById('showsGrid').innerHTML = list.map((title, i) => {
+    const category = currentSport === 'All' ? SHOW_CATEGORY_CYCLE[i % SHOW_CATEGORY_CYCLE.length] : currentSport;
+    return `
+      <div class="card" style="width:100%;">
+        <div class="thumb has-photo" style="background:${gradientFor(category)}; width:100%; aspect-ratio:16/9;">
+          <img class="media-img" src="${imageFor(category, title)}" alt="" loading="lazy"><div class="media-shade"></div>
+          <div class="thumb-stripes"></div>
+          <div class="play-dot"><span><svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></span></div>
+          <div class="show-label">${title}</div>
+        </div>
+        <div class="card-title">${title}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ---------------- Row arrow scroll ---------------- */
+function wireArrows() {
+  document.querySelectorAll('.row-arrow').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = document.getElementById(btn.dataset.scroll);
+      const dir = parseInt(btn.dataset.dir, 10);
+      row.scrollBy({ left: dir * 320, behavior: 'smooth' });
+    });
+  });
+}
+
+/* ---------------- Audio toggle ---------------- */
+const MUTE_ICON = '<polygon points="4,9 9,9 13,5 13,19 9,15 4,15" fill="#fff" stroke="none"/><line x1="17" y1="9" x2="22" y2="14"/><line x1="22" y1="9" x2="17" y2="14"/>';
+const UNMUTE_ICON = '<polygon points="4,9 9,9 13,5 13,19 9,15 4,15" fill="#fff" stroke="none"/><path d="M17 8c1.8 1.2 1.8 6.8 0 8"/><path d="M19.5 5.5c3.2 2.5 3.2 10.5 0 13"/>';
+let audioMuted = true;
+function renderAudio() {
+  document.getElementById('audioIcon').innerHTML = audioMuted ? MUTE_ICON : UNMUTE_ICON;
+  document.getElementById('audioToggle').setAttribute('aria-label', audioMuted ? 'Unmute' : 'Mute');
+}
+document.getElementById('audioToggle').addEventListener('click', () => {
+  audioMuted = !audioMuted;
+  renderAudio();
+});
+
+/* ---------------- Next Watch overlay ---------------- */
+let countdownTimer = null;
+let countdownValue = 8;
+let autoplayCancelled = false;
+
+function openNextWatch() {
+  document.getElementById('upNextThumb').innerHTML = thumbHtml('NBA', { w: 200, h: 130, photo: MEDIA_IMAGES.basketball, teamPair: RECOMMENDED_NBA[0].title });
+  document.getElementById('upNextTitle').textContent = RECOMMENDED_NBA[0].title;
+  document.getElementById('upNextTag').textContent = RECOMMENDED_NBA[0].tag;
+  renderRecommended('nwRecRow');
+  document.getElementById('nextWatch').classList.add('open');
+  autoplayCancelled = false;
+  countdownValue = 8;
+  tickCountdown();
+  clearInterval(countdownTimer);
+  countdownTimer = setInterval(() => {
+    if (autoplayCancelled) { clearInterval(countdownTimer); return; }
+    countdownValue -= 1;
+    if (countdownValue <= 0) { countdownValue = 8; }
+    tickCountdown();
+  }, 1000);
+}
+
+function tickCountdown() {
+  const el = document.getElementById('countdownLabel');
+  if (autoplayCancelled) {
+    el.innerHTML = '<span>Autoplay off</span>';
+  } else {
+    el.innerHTML = '<span class="spinner"></span><span>Playing in ' + countdownValue + 's</span>';
+  }
+}
+
+function closeNextWatch() {
+  document.getElementById('nextWatch').classList.remove('open');
+  clearInterval(countdownTimer);
+}
+
+document.getElementById('watchLiveBtn').addEventListener('click', openNextWatch);
+document.getElementById('nwBack').addEventListener('click', closeNextWatch);
+document.getElementById('cancelAutoplay').addEventListener('click', () => {
+  autoplayCancelled = true;
+  tickCountdown();
+});
+
+/* ---------------- Init ---------------- */
+document.getElementById('historyBadge').textContent = CONTINUE_WATCHING.length;
+renderFollowing();
+renderContinueWatching();
+renderLiveNow();
+renderTrending();
+renderRecommended('recRow');
+renderSportChips();
+renderShows();
+renderAudio();
+wireArrows();
+</script>
+</body>
+</html>
